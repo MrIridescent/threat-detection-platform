@@ -1,0 +1,40 @@
+name: threat-detection-platform
+services:
+- name: api
+  source_dir: /
+  github:
+    repo: MrIridescent/threat-detection-platform
+    branch: main
+  run_command: java -Dserver.port=$PORT -Dspring.profiles.active=digitalocean -jar target/threat-detection-platform-1.0.0.jar
+  build_command: mvn clean package -DskipTests
+  environment_slug: java
+  instance_count: 1
+  instance_size_slug: basic-xxs
+  http_port: 8080
+  health_check:
+    http_path: /actuator/health
+  envs:
+  - key: DATABASE_URL
+    scope: RUN_TIME
+    type: SECRET
+  - key: REDIS_URL
+    scope: RUN_TIME
+    type: SECRET
+  - key: JWT_SECRET
+    scope: RUN_TIME
+    type: SECRET
+  - key: SPRING_PROFILES_ACTIVE
+    scope: RUN_TIME
+    value: digitalocean
+
+databases:
+- name: threat-detection-db
+  engine: PG
+  version: "14"
+  size: basic-xs
+  num_nodes: 1
+  
+- name: threat-detection-redis
+  engine: REDIS
+  version: "7"
+  size: basic-xs

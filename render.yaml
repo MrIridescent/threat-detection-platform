@@ -1,0 +1,36 @@
+services:
+  # Main Application
+  - type: web
+    name: threat-detection-platform
+    env: java
+    buildCommand: mvn clean package -DskipTests
+    startCommand: java -Dserver.port=$PORT -Dspring.profiles.active=render -jar target/threat-detection-platform-1.0.0.jar
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: threat-detection-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: threat-detection-redis
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SPRING_PROFILES_ACTIVE
+        value: render
+    
+  # PostgreSQL Database
+  - type: pserv
+    name: threat-detection-db
+    env: postgresql
+    plan: starter
+    databaseName: threatdetection
+    databaseUser: threatdetection
+    
+  # Redis Cache
+  - type: redis
+    name: threat-detection-redis
+    plan: starter
+    maxmemoryPolicy: allkeys-lru

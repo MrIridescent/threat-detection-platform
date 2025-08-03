@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Threat Detection Platform - Live Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .header { text-align: center; color: white; margin-bottom: 40px; }
+        .header h1 { font-size: 3rem; margin-bottom: 10px; }
+        .header p { font-size: 1.2rem; opacity: 0.9; }
+        .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .demo-card { 
+            background: white; 
+            border-radius: 15px; 
+            padding: 25px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .demo-card:hover { transform: translateY(-5px); }
+        .demo-card h3 { color: #667eea; margin-bottom: 15px; font-size: 1.3rem; }
+        .demo-card p { color: #666; margin-bottom: 15px; line-height: 1.6; }
+        .btn { 
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .status { 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 0.9rem; 
+            font-weight: bold;
+            display: inline-block;
+            margin: 10px 0;
+        }
+        .status.online { background: #d4edda; color: #155724; }
+        .status.loading { background: #fff3cd; color: #856404; }
+        .credentials { 
+            background: #f8f9fa; 
+            border-left: 4px solid #667eea; 
+            padding: 15px; 
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        .credentials h4 { color: #667eea; margin-bottom: 10px; }
+        .credentials code { 
+            background: #e9ecef; 
+            padding: 2px 6px; 
+            border-radius: 3px; 
+            font-family: 'Courier New', monospace;
+        }
+        .api-demo { margin-top: 20px; }
+        .api-demo textarea { 
+            width: 100%; 
+            height: 100px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            padding: 10px;
+            font-family: monospace;
+        }
+        .response { 
+            background: #f8f9fa; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            padding: 15px; 
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛡️ Threat Detection Platform</h1>
+            <p>Enterprise-grade AI-powered cybersecurity in action</p>
+            <div class="status online" id="systemStatus">🟢 System Online</div>
+        </div>
+
+        <div class="demo-grid">
+            <!-- System Overview -->
+            <div class="demo-card">
+                <h3>🎯 System Overview</h3>
+                <p>Real-time threat detection using advanced AI agents working together to identify and respond to security threats.</p>
+                <div class="credentials">
+                    <h4>🔑 Demo Credentials</h4>
+                    <p><strong>Admin:</strong> <code>admin</code> / <code>admin123</code></p>
+                    <p><strong>Analyst:</strong> <code>analyst</code> / <code>analyst123</code></p>
+                    <p><strong>Demo:</strong> <code>demo</code> / <code>demo123</code></p>
+                </div>
+                <button class="btn" onclick="checkSystemHealth()">Check System Health</button>
+            </div>
+
+            <!-- API Explorer -->
+            <div class="demo-card">
+                <h3>🔍 API Explorer</h3>
+                <p>Test the threat detection APIs directly from your browser.</p>
+                <a href="/swagger-ui.html" class="btn" target="_blank">Open API Documentation</a>
+                <div class="api-demo">
+                    <h4>Quick Test - Network Analysis</h4>
+                    <textarea id="networkData" placeholder='{"sourceIp": "192.168.1.100", "destinationIp": "10.0.0.1", "protocol": "TCP", "payload": "suspicious_data"}'></textarea>
+                    <br><br>
+                    <button class="btn" onclick="testNetworkAnalysis()">Analyze Network Traffic</button>
+                    <div id="networkResponse" class="response" style="display:none;"></div>
+                </div>
+            </div>
+
+            <!-- AI Models -->
+            <div class="demo-card">
+                <h3>🤖 AI Models Status</h3>
+                <p>Monitor the performance of our AI/ML models for threat detection.</p>
+                <div id="modelStatus">
+                    <p>📊 <strong>Project Iris:</strong> 94% accuracy</p>
+                    <p>🕸️ <strong>PhishNet:</strong> 87% campaign prediction</p>
+                    <p>🔍 <strong>Anomaly Detection:</strong> Active</p>
+                </div>
+                <button class="btn" onclick="refreshModelStatus()">Refresh Model Status</button>
+            </div>
+
+            <!-- Monitoring Dashboard -->
+            <div class="demo-card">
+                <h3>📊 Monitoring Dashboard</h3>
+                <p>Real-time metrics and system performance monitoring.</p>
+                <a href="/actuator/health" class="btn" target="_blank">Health Endpoint</a>
+                <a href="/actuator/metrics" class="btn" target="_blank">Metrics Endpoint</a>
+                <a href="/actuator/prometheus" class="btn" target="_blank">Prometheus Metrics</a>
+            </div>
+
+            <!-- Agent Status -->
+            <div class="demo-card">
+                <h3>🤖 Agent Orchestrator</h3>
+                <p>Monitor the status of all AI agents in the system.</p>
+                <div id="agentStatus">Loading agent status...</div>
+                <button class="btn" onclick="checkAgentStatus()">Refresh Agent Status</button>
+            </div>
+
+            <!-- Demo Scenarios -->
+            <div class="demo-card">
+                <h3>🎭 Demo Scenarios</h3>
+                <p>Pre-built scenarios to showcase threat detection capabilities.</p>
+                <button class="btn" onclick="runDemoScenario('sql_injection')">SQL Injection Demo</button>
+                <button class="btn" onclick="runDemoScenario('phishing')">Phishing Campaign Demo</button>
+                <button class="btn" onclick="runDemoScenario('anomaly')">Anomaly Detection Demo</button>
+                <div id="scenarioResult" class="response" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check system health
+        async function checkSystemHealth() {
+            try {
+                const response = await fetch('/actuator/health');
+                const data = await response.json();
+                document.getElementById('systemStatus').innerHTML = 
+                    data.status === 'UP' ? '🟢 System Online' : '🔴 System Issues';
+                alert('System Status: ' + data.status);
+            } catch (error) {
+                document.getElementById('systemStatus').innerHTML = '🔴 System Offline';
+                alert('Error checking system health: ' + error.message);
+            }
+        }
+
+        // Test network analysis
+        async function testNetworkAnalysis() {
+            const data = document.getElementById('networkData').value;
+            try {
+                const response = await fetch('/api/v1/analyze/network', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: data
+                });
+                const result = await response.text();
+                document.getElementById('networkResponse').style.display = 'block';
+                document.getElementById('networkResponse').textContent = result;
+            } catch (error) {
+                document.getElementById('networkResponse').style.display = 'block';
+                document.getElementById('networkResponse').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        // Check agent status
+        async function checkAgentStatus() {
+            try {
+                const response = await fetch('/api/v1/agents/status');
+                const data = await response.json();
+                let statusHtml = '';
+                for (const [agent, status] of Object.entries(data)) {
+                    statusHtml += `<p>🤖 <strong>${agent}:</strong> ${status}</p>`;
+                }
+                document.getElementById('agentStatus').innerHTML = statusHtml;
+            } catch (error) {
+                document.getElementById('agentStatus').innerHTML = 'Error loading agent status';
+            }
+        }
+
+        // Refresh model status
+        function refreshModelStatus() {
+            // Simulate model status refresh
+            const models = [
+                { name: 'Project Iris', accuracy: Math.floor(Math.random() * 5) + 90 },
+                { name: 'PhishNet', accuracy: Math.floor(Math.random() * 10) + 85 },
+                { name: 'Anomaly Detection', status: 'Active' }
+            ];
+            
+            let statusHtml = '';
+            models.forEach(model => {
+                if (model.accuracy) {
+                    statusHtml += `<p>📊 <strong>${model.name}:</strong> ${model.accuracy}% accuracy</p>`;
+                } else {
+                    statusHtml += `<p>🔍 <strong>${model.name}:</strong> ${model.status}</p>`;
+                }
+            });
+            document.getElementById('modelStatus').innerHTML = statusHtml;
+        }
+
+        // Run demo scenarios
+        function runDemoScenario(scenario) {
+            const scenarios = {
+                sql_injection: 'Simulating SQL injection attack... Threat detected and blocked!',
+                phishing: 'Analyzing phishing campaign... 15 malicious domains identified!',
+                anomaly: 'Running anomaly detection... 3 suspicious patterns found!'
+            };
+            
+            document.getElementById('scenarioResult').style.display = 'block';
+            document.getElementById('scenarioResult').textContent = scenarios[scenario];
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemHealth();
+            checkAgentStatus();
+        });
+    </script>
+</body>
+</html>

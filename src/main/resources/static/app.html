@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ Threat Detection Platform - User Portal</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .navbar { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        .navbar .logo { font-size: 1.5rem; font-weight: bold; }
+        .navbar .nav-links { display: flex; gap: 2rem; align-items: center; }
+        .navbar .nav-links a { color: white; text-decoration: none; transition: opacity 0.3s; }
+        .navbar .nav-links a:hover { opacity: 0.8; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+        .hero { text-align: center; color: white; margin: 4rem 0; }
+        .hero h1 { font-size: 4rem; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .hero p { font-size: 1.3rem; margin-bottom: 2rem; opacity: 0.9; }
+        .cta-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+        .btn { 
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white; 
+            border: none; 
+            padding: 1rem 2rem; 
+            border-radius: 8px; 
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+        .btn.secondary { background: linear-gradient(45deg, #6c757d, #495057); }
+        .btn.outline { background: transparent; border: 2px solid white; }
+        .btn.success { background: linear-gradient(45deg, #28a745, #20c997); }
+        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin: 4rem 0; }
+        .feature-card { 
+            background: rgba(255,255,255,0.1); 
+            backdrop-filter: blur(10px);
+            border-radius: 15px; 
+            padding: 2rem; 
+            color: white;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        .feature-card:hover { transform: translateY(-5px); }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 1rem; }
+        .feature-card p { opacity: 0.9; line-height: 1.6; }
+        .auth-section { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; 
+            padding: 2rem; 
+            margin: 2rem auto;
+            max-width: 500px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .form-group { margin-bottom: 1.5rem; }
+        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333; }
+        .form-group input, .form-group select { 
+            width: 100%; 
+            padding: 0.75rem; 
+            border: 2px solid #dee2e6; 
+            border-radius: 8px; 
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        .form-group input:focus, .form-group select:focus { border-color: #667eea; outline: none; }
+        .hidden { display: none; }
+        .alert { 
+            padding: 1rem; 
+            border-radius: 8px; 
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        .alert.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .alert.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .dashboard { 
+            background: rgba(255,255,255,0.95); 
+            border-radius: 15px; 
+            padding: 2rem; 
+            margin: 2rem 0;
+        }
+        .dashboard h2 { color: #667eea; margin-bottom: 1.5rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin: 2rem 0; }
+        .stat-card { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+        .stat-value { font-size: 2rem; font-weight: bold; color: #667eea; }
+        .stat-label { color: #6c757d; margin-top: 0.5rem; }
+        .user-badge { 
+            background: #28a745; 
+            color: white; 
+            padding: 0.25rem 0.75rem; 
+            border-radius: 15px; 
+            font-size: 0.8rem; 
+            font-weight: bold;
+        }
+        .pricing-card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 2rem;
+            color: white;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .pricing-card.featured {
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+        .pricing-card:hover { transform: translateY(-5px) scale(1.02); }
+        .price { font-size: 3rem; font-weight: bold; margin: 1rem 0; }
+        .price-period { font-size: 1rem; opacity: 0.8; }
+        .feature-list { text-align: left; margin: 1.5rem 0; }
+        .feature-list li { margin: 0.5rem 0; opacity: 0.9; }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">🛡️ Threat Detection Platform</div>
+        <div class="nav-links">
+            <a href="#" onclick="showSection('home')">Home</a>
+            <a href="#" onclick="showSection('features')">Features</a>
+            <a href="#" onclick="showSection('pricing')">Pricing</a>
+            <a href="live-demo.html" target="_blank">Demo</a>
+            <a href="#" onclick="showSection('login')" id="loginLink">Login</a>
+            <a href="#" onclick="showSection('register')" id="registerLink">Sign Up</a>
+            <div id="userMenu" class="hidden">
+                <span id="userName" class="user-badge"></span>
+                <a href="#" onclick="showSection('dashboard')">Dashboard</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Home Section -->
+        <div id="homeSection">
+            <div class="hero">
+                <h1>🛡️ Enterprise AI Security</h1>
+                <p>Protect your organization with advanced AI-powered threat detection and automated response</p>
+                <div class="cta-buttons">
+                    <a href="#" onclick="showSection('register')" class="btn">🚀 Start Free Trial</a>
+                    <a href="#" onclick="showSection('login')" class="btn outline">🔐 Sign In</a>
+                    <a href="live-demo.html" class="btn secondary" target="_blank">👁️ View Demo</a>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <h3>🤖 AI-Powered Detection</h3>
+                    <p>Advanced machine learning models with 94%+ accuracy for real-time threat identification and behavioral analysis.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ Instant Response</h3>
+                    <p>Automated threat response with sub-second detection and immediate containment of security incidents.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🏢 Enterprise Scale</h3>
+                    <p>Kubernetes-native deployment with auto-scaling, high availability, and enterprise-grade security controls.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>📊 Real-Time Analytics</h3>
+                    <p>Comprehensive dashboards with live metrics, threat intelligence feeds, and detailed security reporting.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔒 Zero Trust Architecture</h3>
+                    <p>Multi-layered security with JWT authentication, RBAC, and advanced encryption for complete protection.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🌐 Cloud Native</h3>
+                    <p>Deploy on AWS, Azure, GCP, or on-premises with Docker containers and Kubernetes orchestration.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div id="pricingSection" class="hidden">
+            <div class="hero">
+                <h1>💰 Choose Your Plan</h1>
+                <p>Flexible pricing for organizations of all sizes</p>
+            </div>
+
+            <div class="features">
+                <div class="pricing-card">
+                    <h3>🚀 Starter</h3>
+                    <div class="price">Free<span class="price-period">/month</span></div>
+                    <ul class="feature-list">
+                        <li>✅ Up to 100 endpoints</li>
+                        <li>✅ Basic threat detection</li>
+                        <li>✅ Email alerts</li>
+                        <li>✅ Community support</li>
+                        <li>✅ 30-day data retention</li>
+                    </ul>
+                    <button class="btn" onclick="selectPlan('starter')">Get Started</button>
+                </div>
+
+                <div class="pricing-card featured">
+                    <h3>🏢 Professional</h3>
+                    <div class="price">$99<span class="price-period">/month</span></div>
+                    <ul class="feature-list">
+                        <li>✅ Up to 1,000 endpoints</li>
+                        <li>✅ Advanced AI detection</li>
+                        <li>✅ Real-time alerts</li>
+                        <li>✅ Priority support</li>
+                        <li>✅ 1-year data retention</li>
+                        <li>✅ Custom dashboards</li>
+                        <li>✅ API access</li>
+                    </ul>
+                    <button class="btn" onclick="selectPlan('professional')">Start Trial</button>
+                </div>
+
+                <div class="pricing-card">
+                    <h3>🏭 Enterprise</h3>
+                    <div class="price">Custom<span class="price-period">pricing</span></div>
+                    <ul class="feature-list">
+                        <li>✅ Unlimited endpoints</li>
+                        <li>✅ Custom AI models</li>
+                        <li>✅ 24/7 SOC support</li>
+                        <li>✅ Dedicated success manager</li>
+                        <li>✅ Unlimited data retention</li>
+                        <li>✅ On-premises deployment</li>
+                        <li>✅ Custom integrations</li>
+                    </ul>
+                    <button class="btn" onclick="selectPlan('enterprise')">Contact Sales</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Login Section -->
+        <div id="loginSection" class="hidden">
+            <div class="auth-section">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 2rem;">🔐 Sign In</h2>
+                <div id="loginAlert"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email Address</label>
+                        <input type="email" id="loginEmail" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">🔐 Sign In</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">
+                    Don't have an account? <a href="#" onclick="showSection('register')" style="color: #667eea;">Sign up here</a>
+                </p>
+                <div style="margin-top: 2rem; padding: 1rem; background: #f8f9fa; border-radius: 8px;">
+                    <h4 style="color: #667eea; margin-bottom: 1rem;">Demo Accounts:</h4>
+                    <p><strong>Admin:</strong> admin@threatdetection.ai / admin123</p>
+                    <p><strong>Analyst:</strong> analyst@threatdetection.ai / analyst123</p>
+                    <p><strong>Demo:</strong> demo@threatdetection.ai / demo123</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Register Section -->
+        <div id="registerSection" class="hidden">
+            <div class="auth-section">
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 2rem;">🚀 Create Account</h2>
+                <div id="registerAlert"></div>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerName">Full Name</label>
+                        <input type="text" id="registerName" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail">Email Address</label>
+                        <input type="email" id="registerEmail" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerCompany">Company</label>
+                        <input type="text" id="registerCompany" placeholder="Enter your company name">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerRole">Role</label>
+                        <select id="registerRole" required>
+                            <option value="">Select your role</option>
+                            <option value="security_analyst">Security Analyst</option>
+                            <option value="it_admin">IT Administrator</option>
+                            <option value="ciso">CISO/Security Manager</option>
+                            <option value="developer">Developer</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword">Password</label>
+                        <input type="password" id="registerPassword" required placeholder="Create a strong password">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerConfirmPassword">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" required placeholder="Confirm your password">
+                    </div>
+                    <button type="submit" class="btn" style="width: 100%;">🚀 Create Account</button>
+                </form>
+                <p style="text-align: center; margin-top: 1rem;">
+                    Already have an account? <a href="#" onclick="showSection('login')" style="color: #667eea;">Sign in here</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="hidden">
+            <div class="dashboard">
+                <h2>🛡️ Security Dashboard</h2>
+                <div id="userInfo"></div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="threatsDetected">1,247</div>
+                        <div class="stat-label">Threats Detected</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="systemUptime">99.9%</div>
+                        <div class="stat-label">System Uptime</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="activeAlerts">3</div>
+                        <div class="stat-label">Active Alerts</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="responseTime">0.3s</div>
+                        <div class="stat-label">Avg Response Time</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; margin-top: 2rem;">
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
+                        <h3 style="color: #667eea; margin-bottom: 1rem;">🤖 AI Models Status</h3>
+                        <div id="aiModelsStatus">
+                            <p>🧠 Project Iris: <span style="color: #28a745;">94.2% accuracy</span></p>
+                            <p>🕸️ PhishNet: <span style="color: #28a745;">87.8% detection</span></p>
+                            <p>🔍 Anomaly Detection: <span style="color: #28a745;">Active</span></p>
+                        </div>
+                    </div>
+                    
+                    <div style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px;">
+                        <h3 style="color: #667eea; margin-bottom: 1rem;">⚡ Recent Activity</h3>
+                        <div id="recentActivity">
+                            <p>🚨 SQL Injection blocked - 2 min ago</p>
+                            <p>⚠️ Suspicious login detected - 5 min ago</p>
+                            <p>🔍 Anomaly in network traffic - 8 min ago</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 2rem; text-align: center;">
+                    <a href="live-demo.html" class="btn" target="_blank">🎯 Open Full Demo</a>
+                    <button class="btn secondary" onclick="refreshDashboard()">🔄 Refresh Data</button>
+                    <button class="btn success" onclick="showSection('pricing')">⬆️ Upgrade Plan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Application state
+        let currentUser = null;
+        let authToken = null;
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthStatus();
+            showSection('home');
+        });
+
+        // Section management
+        function showSection(sectionName) {
+            document.querySelectorAll('[id$="Section"]').forEach(section => {
+                section.classList.add('hidden');
+            });
+            
+            const section = document.getElementById(sectionName + 'Section');
+            if (section) {
+                section.classList.remove('hidden');
+            }
+        }
+
+        // Authentication functions
+        function checkAuthStatus() {
+            authToken = localStorage.getItem('authToken');
+            currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+            
+            if (authToken && currentUser) {
+                document.getElementById('loginLink').classList.add('hidden');
+                document.getElementById('registerLink').classList.add('hidden');
+                document.getElementById('userMenu').classList.remove('hidden');
+                document.getElementById('userName').textContent = currentUser.name;
+                updateUserInfo();
+            } else {
+                document.getElementById('loginLink').classList.remove('hidden');
+                document.getElementById('registerLink').classList.remove('hidden');
+                document.getElementById('userMenu').classList.add('hidden');
+            }
+        }
+
+        // Login form handler
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            try {
+                const response = await simulateLogin(email, password);
+                
+                if (response.success) {
+                    authToken = response.token;
+                    currentUser = response.user;
+                    
+                    localStorage.setItem('authToken', authToken);
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    
+                    showAlert('loginAlert', 'Login successful! Welcome back!', 'success');
+                    
+                    setTimeout(() => {
+                        checkAuthStatus();
+                        showSection('dashboard');
+                    }, 1000);
+                } else {
+                    showAlert('loginAlert', response.message, 'error');
+                }
+            } catch (error) {
+                showAlert('loginAlert', 'Login failed. Please try again.', 'error');
+            }
+        });
+
+        // Register form handler
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const company = document.getElementById('registerCompany').value;
+            const role = document.getElementById('registerRole').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            if (password !== confirmPassword) {
+                showAlert('registerAlert', 'Passwords do not match!', 'error');
+                return;
+            }
+            
+            try {
+                const response = await simulateRegister(name, email, company, role, password);
+                
+                if (response.success) {
+                    showAlert('registerAlert', 'Account created successfully! Please sign in.', 'success');
+                    setTimeout(() => showSection('login'), 2000);
+                } else {
+                    showAlert('registerAlert', response.message, 'error');
+                }
+            } catch (error) {
+                showAlert('registerAlert', 'Registration failed. Please try again.', 'error');
+            }
+        });
+
+        // Plan selection
+        function selectPlan(plan) {
+            if (!currentUser) {
+                showSection('register');
+                showAlert('registerAlert', 'Please create an account to select a plan.', 'error');
+                return;
+            }
+            
+            alert(`🎉 Plan Selected: ${plan.toUpperCase()}\n\nIn a real deployment, this would:\n• Process payment (if applicable)\n• Provision resources\n• Send welcome email\n• Activate features\n\nFor demo purposes, you now have access to all features!`);
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            authToken = null;
+            currentUser = null;
+            checkAuthStatus();
+            showSection('home');
+            alert('👋 You have been logged out successfully!');
+        }
+
+        // Utility functions
+        function showAlert(containerId, message, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = `<div class="alert ${type}">${message}</div>`;
+            setTimeout(() => container.innerHTML = '', 5000);
+        }
+
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('userInfo').innerHTML = `
+                    <div style="background: #e8f5e8; padding: 1rem; border-radius: 8px; margin-bottom: 2rem;">
+                        <h3>Welcome back, ${currentUser.name}! 👋</h3>
+                        <p><strong>Role:</strong> ${currentUser.role} | <strong>Email:</strong> ${currentUser.email}</p>
+                        ${currentUser.company ? `<p><strong>Company:</strong> ${currentUser.company}</p>` : ''}
+                        <p><strong>Plan:</strong> Professional (Trial) | <strong>Endpoints:</strong> 247/1,000</p>
+                    </div>
+                `;
+            }
+        }
+
+        function refreshDashboard() {
+            document.getElementById('threatsDetected').textContent = (1247 + Math.floor(Math.random() * 10)).toLocaleString();
+            document.getElementById('activeAlerts').textContent = Math.floor(Math.random() * 5) + 1;
+            document.getElementById('responseTime').textContent = (0.2 + Math.random() * 0.3).toFixed(1) + 's';
+            
+            showAlert('dashboardSection', 'Dashboard data refreshed!', 'success');
+        }
+
+        // Simulation functions (replace with real API calls)
+        async function simulateLogin(email, password) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            const demoAccounts = {
+                'admin@threatdetection.ai': { name: 'Admin User', role: 'Administrator', company: 'Threat Detection Inc.' },
+                'analyst@threatdetection.ai': { name: 'Security Analyst', role: 'Analyst', company: 'Threat Detection Inc.' },
+                'demo@threatdetection.ai': { name: 'Demo User', role: 'Demo', company: 'Demo Company' }
+            };
+            
+            if (demoAccounts[email] && (password === 'admin123' || password === 'analyst123' || password === 'demo123')) {
+                return {
+                    success: true,
+                    token: 'demo-jwt-token-' + Date.now(),
+                    user: { email, ...demoAccounts[email] }
+                };
+            }
+            
+            return { success: false, message: 'Invalid credentials' };
+        }
+
+        async function simulateRegister(name, email, company, role, password) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            return { success: true, message: 'Account created successfully' };
+        }
+
+        // Real-time updates
+        setInterval(() => {
+            if (currentUser && !document.getElementById('dashboardSection').classList.contains('hidden')) {
+                // Subtle updates without showing alert
+                document.getElementById('threatsDetected').textContent = (1247 + Math.floor(Math.random() * 10)).toLocaleString();
+            }
+        }, 30000);
+    </script>
+</body>
+</html>

@@ -280,6 +280,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
+                    <mainClass>com.mriridescent.threatdetection.ThreatDetectionApplication</mainClass>
                     <excludes>
                         <exclude>
                             <groupId>org.projectlombok</groupId>
@@ -446,6 +447,7 @@
                         <groupId>org.springframework.boot</groupId>
                         <artifactId>spring-boot-maven-plugin</artifactId>
                         <configuration>
+                            <mainClass>com.mriridescent.threatdetection.ThreatDetectionApplication</mainClass>
                             <optimizedLaunch>true</optimizedLaunch>
                         </configuration>
                     </plugin>

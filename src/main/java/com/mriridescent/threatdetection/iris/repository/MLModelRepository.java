@@ -1,5 +1,4 @@
 package com.mriridescent.threatdetection.iris.repository;
-package com.mriridescent.threatdetection.iris.repository;
 
 import com.mriridescent.threatdetection.iris.model.entity.MLModel;
 import org.springframework.data.jpa.repository.JpaRepository;

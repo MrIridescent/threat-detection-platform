@@ -1,5 +1,4 @@
 package com.mriridescent.threatdetection.phishnet.repository;
-package com.mriridescent.threatdetection.phishnet.repository;
 
 import com.mriridescent.threatdetection.phishnet.model.entity.AttackVector;
 import org.springframework.data.jpa.repository.JpaRepository;

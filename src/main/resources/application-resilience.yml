@@ -1,0 +1,183 @@
+# Resilience4j Configuration for Agent Coordinator
+resilience4j:
+  circuitbreaker:
+    instances:
+      network-analysis:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+        recordExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        ignoreExceptions:
+          - java.lang.IllegalArgumentException
+      
+      behavior-analysis:
+        registerHealthIndicator: true
+        slidingWindowSize: 10
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        failureRateThreshold: 50
+        eventConsumerBufferSize: 10
+      
+      threat-correlation:
+        registerHealthIndicator: true
+        slidingWindowSize: 20
+        minimumNumberOfCalls: 10
+        permittedNumberOfCallsInHalfOpenState: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 10s
+        failureRateThreshold: 60
+        eventConsumerBufferSize: 10
+
+  retry:
+    instances:
+      network-analysis:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+        retryExceptions:
+          - java.io.IOException
+          - java.util.concurrent.TimeoutException
+        ignoreExceptions:
+          - java.lang.IllegalArgumentException
+      
+      behavior-analysis:
+        maxAttempts: 3
+        waitDuration: 1s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 2
+      
+      threat-correlation:
+        maxAttempts: 2
+        waitDuration: 2s
+        enableExponentialBackoff: true
+        exponentialBackoffMultiplier: 1.5
+
+  ratelimiter:
+    instances:
+      network-analysis:
+        limitForPeriod: 100
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+      
+      behavior-analysis:
+        limitForPeriod: 50
+        limitRefreshPeriod: 1s
+        timeoutDuration: 0
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 100
+
+  bulkhead:
+    instances:
+      network-analysis:
+        maxConcurrentCalls: 25
+        maxWaitDuration: 1s
+      
+      behavior-analysis:
+        maxConcurrentCalls: 15
+        maxWaitDuration: 1s
+
+# Agent Coordinator Configuration
+threat-detection:
+  coordinator:
+    max-concurrent-workflows: 100
+    workflow-timeout: 300
+    enable-intelligence-enrichment: true
+    cleanup-interval: 300000
+    metrics:
+      enabled: true
+      export-interval: 30s
+    
+  agents:
+    network-monitor:
+      timeout: 30s
+      retry-attempts: 3
+      circuit-breaker: true
+    
+    behavior-analysis:
+      timeout: 45s
+      retry-attempts: 3
+      circuit-breaker: true
+    
+    threat-intelligence:
+      timeout: 60s
+      retry-attempts: 2
+      circuit-breaker: true
+    
+    threat-response:
+      timeout: 30s
+      retry-attempts: 3
+      circuit-breaker: true
+    
+    pattern-learning:
+      timeout: 120s
+      retry-attempts: 1
+      circuit-breaker: false
+
+# Caching Configuration
+spring:
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=1000,expireAfterWrite=1h
+    cache-names:
+      - workflow-status
+      - threat-intelligence
+      - user-profiles
+      - risk-scores
+
+# Async Configuration
+  task:
+    execution:
+      pool:
+        core-size: 10
+        max-size: 50
+        queue-capacity: 100
+        keep-alive: 60s
+      thread-name-prefix: "coordinator-"
+    scheduling:
+      pool:
+        size: 5
+      thread-name-prefix: "scheduler-"
+
+# Monitoring Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,ratelimiters
+  endpoint:
+    health:
+      show-details: always
+      show-components: always
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true
+        threat_detection_workflow_duration: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+        threat_detection_workflow_duration: 0.5, 0.95, 0.99
+
+# Logging Configuration
+logging:
+  level:
+    com.mriridescent.threatdetection.agent.coordinator: DEBUG
+    io.github.resilience4j: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

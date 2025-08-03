@@ -1,0 +1,180 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/plain
+    min-response-size: 1024
+
+spring:
+  application:
+    name: threat-detection-platform
+
+  # Database Configuration
+  datasource:
+    url: jdbc:postgresql://localhost:5432/threatdetection
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      idle-timeout: 30000
+      connection-timeout: 20000
+
+  # JPA Configuration
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.batch_size: 50
+        order_inserts: true
+        order_updates: true
+
+  # Flyway Configuration
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+  # Jackson Configuration
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      fail-on-unknown-properties: false
+    default-property-inclusion: non_null
+# Common application settings
+spring:
+  application:
+    name: threat-detection-platform
+
+  # Database configuration
+  datasource:
+    url: jdbc:h2:mem:threatdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+
+  # JPA/Hibernate configuration
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.lob.non_contextual_creation: true
+
+  # H2 Console
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+
+  # Spring Security
+  security:
+    user:
+      name: admin
+      password: admin
+
+# JWT Configuration
+jwt:
+  secret-key: "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970"
+  expiration: 86400000 # 1 day in milliseconds
+  refresh-token:
+    expiration: 604800000 # 7 days in milliseconds
+
+# Server configuration
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: never
+    include-exception: false
+
+# Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Logging configuration
+logging:
+  level:
+    root: INFO
+    com.mriridescent.threatdetection: DEBUG
+    org.springframework.security: INFO
+
+# Application-specific settings
+threatdetection:
+  # Iris settings
+  iris:
+    models-path: ./models
+    threat-threshold: 0.75
+
+  # PhishNet settings
+  phishnet:
+    max-campaign-nodes: 100
+    tracking-enabled: true
+# Security Configuration
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # 1 day
+      refresh-token:
+        expiration: 604800000 # 7 days
+
+# Actuator Configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when_authorized
+
+# Logging Configuration
+logging:
+  level:
+    root: INFO
+    com.mriridescent.threatdetection: DEBUG
+    org.springframework.web: INFO
+    org.hibernate: INFO
+
+# Swagger/OpenAPI Configuration
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+  packages-to-scan: com.mriridescent.threatdetection
+
+# Application-specific Configuration
+threatdetection:
+  iris:
+    models:
+      base-path: /opt/threatdetection/models
+    analysis:
+      retention-days: 90
+  phishnet:
+    visualization:
+      enabled: true

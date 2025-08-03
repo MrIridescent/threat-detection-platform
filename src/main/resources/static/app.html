@@ -521,38 +521,140 @@
             }
         }
 
-        function refreshDashboard() {
-            document.getElementById('threatsDetected').textContent = (1247 + Math.floor(Math.random() * 10)).toLocaleString();
-            document.getElementById('activeAlerts').textContent = Math.floor(Math.random() * 5) + 1;
-            document.getElementById('responseTime').textContent = (0.2 + Math.random() * 0.3).toFixed(1) + 's';
-            
-            showAlert('dashboardSection', 'Dashboard data refreshed!', 'success');
+        async function refreshDashboard() {
+            if (!authToken) {
+                showAlert('dashboardSection', 'Please login to refresh dashboard', 'error');
+                return;
+            }
+
+            try {
+                // Get coordinator health and statistics
+                const healthResponse = await fetch('/api/v1/coordinator/health', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (healthResponse.ok) {
+                    const healthData = await healthResponse.json();
+                    document.getElementById('threatsDetected').textContent = healthData.totalProcessed.toLocaleString();
+                    document.getElementById('systemUptime').textContent = (healthData.successRate * 100).toFixed(1) + '%';
+                    document.getElementById('activeAlerts').textContent = healthData.activeWorkflows;
+                    document.getElementById('responseTime').textContent = (healthData.averageDuration / 1000).toFixed(1) + 's';
+                }
+
+                // Get demo visualization data
+                const demoResponse = await fetch('/api/v1/demo/network-overview', {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (demoResponse.ok) {
+                    const demoData = await demoResponse.json();
+                    updateAIModelsStatus(demoData);
+                }
+
+                showAlert('dashboardSection', 'Dashboard data refreshed from live backend!', 'success');
+            } catch (error) {
+                console.error('Dashboard refresh error:', error);
+                // Fallback to simulated data
+                document.getElementById('threatsDetected').textContent = (1247 + Math.floor(Math.random() * 10)).toLocaleString();
+                document.getElementById('activeAlerts').textContent = Math.floor(Math.random() * 5) + 1;
+                document.getElementById('responseTime').textContent = (0.2 + Math.random() * 0.3).toFixed(1) + 's';
+                showAlert('dashboardSection', 'Dashboard refreshed (offline mode)', 'success');
+            }
         }
 
-        // Simulation functions (replace with real API calls)
-        async function simulateLogin(email, password) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            
-            const demoAccounts = {
-                'admin@threatdetection.ai': { name: 'Admin User', role: 'Administrator', company: 'Threat Detection Inc.' },
-                'analyst@threatdetection.ai': { name: 'Security Analyst', role: 'Analyst', company: 'Threat Detection Inc.' },
-                'demo@threatdetection.ai': { name: 'Demo User', role: 'Demo', company: 'Demo Company' }
-            };
-            
-            if (demoAccounts[email] && (password === 'admin123' || password === 'analyst123' || password === 'demo123')) {
-                return {
-                    success: true,
-                    token: 'demo-jwt-token-' + Date.now(),
-                    user: { email, ...demoAccounts[email] }
-                };
+        function updateAIModelsStatus(data) {
+            const statusContainer = document.getElementById('aiModelsStatus');
+            if (data && data.aiModels) {
+                let statusHtml = '';
+                data.aiModels.forEach(model => {
+                    const status = model.active ? 'Active' : 'Inactive';
+                    const color = model.active ? '#28a745' : '#dc3545';
+                    statusHtml += `<p>🧠 ${model.name}: <span style="color: ${color};">${model.accuracy || status}</span></p>`;
+                });
+                statusContainer.innerHTML = statusHtml;
             }
-            
-            return { success: false, message: 'Invalid credentials' };
+        }
+
+        // Real API functions - Connected to Spring Boot backend
+        async function simulateLogin(email, password) {
+            try {
+                const response = await fetch('/api/v1/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        username: email,
+                        password: password
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        success: true,
+                        token: data.token,
+                        user: {
+                            email: data.username,
+                            name: data.username,
+                            role: data.role,
+                            company: 'Your Company'
+                        }
+                    };
+                } else {
+                    const error = await response.json();
+                    return { success: false, message: error.message || 'Login failed' };
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                return { success: false, message: 'Network error. Please try again.' };
+            }
         }
 
         async function simulateRegister(name, email, company, role, password) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            return { success: true, message: 'Account created successfully' };
+            try {
+                const response = await fetch('/api/v1/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        username: email.split('@')[0], // Use email prefix as username
+                        password: password,
+                        company: company,
+                        role: role
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        success: true,
+                        message: 'Account created successfully! You can now sign in.',
+                        token: data.token,
+                        user: {
+                            email: data.username,
+                            name: name,
+                            role: data.role,
+                            company: company
+                        }
+                    };
+                } else {
+                    const error = await response.json();
+                    return { success: false, message: error.message || 'Registration failed' };
+                }
+            } catch (error) {
+                console.error('Registration error:', error);
+                return { success: false, message: 'Network error. Please try again.' };
+            }
         }
 
         // Real-time updates

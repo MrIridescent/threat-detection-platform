@@ -2,6 +2,7 @@ package com.mriridescent.threatdetection.controller;
 
 import com.mriridescent.threatdetection.dto.AuthRequest;
 import com.mriridescent.threatdetection.dto.AuthResponse;
+import com.mriridescent.threatdetection.dto.RegisterRequest;
 import com.mriridescent.threatdetection.model.User;
 import com.mriridescent.threatdetection.security.JwtService;
 import com.mriridescent.threatdetection.service.UserService;
@@ -53,5 +54,29 @@ public class AuthController {
                 .username(user.getUsername())
                 .role(user.getRole().name())
                 .build());
+    }
+
+    /**
+     * Register a new user
+     *
+     * @param request The registration request
+     * @return The registration response
+     */
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
+        try {
+            User user = userService.createUser(request);
+            String jwtToken = jwtService.generateToken(user);
+            String refreshToken = jwtService.generateRefreshToken(user);
+
+            return ResponseEntity.ok(AuthResponse.builder()
+                    .token(jwtToken)
+                    .refreshToken(refreshToken)
+                    .username(user.getUsername())
+                    .role(user.getRole().name())
+                    .build());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

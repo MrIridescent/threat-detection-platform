@@ -1,6 +1,8 @@
 package com.mriridescent.threatdetection.service;
 
+import com.mriridescent.threatdetection.dto.RegisterRequest;
 import com.mriridescent.threatdetection.model.User;
+import com.mriridescent.threatdetection.model.Role;
 import com.mriridescent.threatdetection.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,6 +37,34 @@ public class UserService implements UserDetailsService {
      */
     public User createUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
+    }
+
+    /**
+     * Create a new user from registration request
+     *
+     * @param request The registration request
+     * @return The created user
+     */
+    public User createUser(RegisterRequest request) {
+        // Check if username already exists
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new RuntimeException("Username already exists");
+        }
+
+        // Check if email already exists
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
+            throw new RuntimeException("Email already exists");
+        }
+
+        User user = User.builder()
+                .username(request.getUsername())
+                .email(request.getEmail())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .role(Role.USER) // Default role for new registrations
+                .enabled(true)
+                .build();
+
         return userRepository.save(user);
     }
 
